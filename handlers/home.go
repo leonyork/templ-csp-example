@@ -37,7 +37,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// If we set the connect-src to be none, then the `hx-get` will fail to load.
 	//csp := fmt.Sprintf("connect-src 'none'; script-src 'sha256-%s' 'sha256-%s' '%s' 'unsafe-hashes'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
 
-	w.Header().Add("Content-Security-Policy", csp)
+	w.Header().Add("No-Content-Security-Policy", csp)
 	components.Page().Render(r.Context(), w)
 }
 

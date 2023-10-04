@@ -11,6 +11,7 @@ import "bytes"
 
 const HTMX_SCRIPT_SHA = "sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
 const HTMX_STYLE_SHA = "sha256-d7rFBVhb3n/Drrf+EpNWYdITkos3kQRFpB0oSOycXg4="
+const BODY_ID = "the-body"
 
 func Page() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
@@ -42,20 +43,11 @@ func Page() templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</script></head>")
+		_, err = templBuffer.WriteString("</script></head><body id=\"")
 		if err != nil {
 			return err
 		}
-		err = templ.RenderScriptItems(ctx, templBuffer, App())
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("<body onload=\"")
-		if err != nil {
-			return err
-		}
-		var var_3 templ.ComponentScript = App()
-		_, err = templBuffer.WriteString(var_3.Call)
+		_, err = templBuffer.WriteString(templ.EscapeString(BODY_ID))
 		if err != nil {
 			return err
 		}
@@ -63,8 +55,8 @@ func Page() templ.Component {
 		if err != nil {
 			return err
 		}
-		var_4 := `Check the console for a log!`
-		_, err = templBuffer.WriteString(var_4)
+		var_3 := `Check the console for a log!`
+		_, err = templBuffer.WriteString(var_3)
 		if err != nil {
 			return err
 		}
@@ -72,12 +64,20 @@ func Page() templ.Component {
 		if err != nil {
 			return err
 		}
-		var_5 := `Loading htmx...`
-		_, err = templBuffer.WriteString(var_5)
+		var_4 := `Loading htmx...`
+		_, err = templBuffer.WriteString(var_4)
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</div></body></html>")
+		_, err = templBuffer.WriteString("</div></body>")
+		if err != nil {
+			return err
+		}
+		err = onLoad(App()).Render(ctx, templBuffer)
+		if err != nil {
+			return err
+		}
+		_, err = templBuffer.WriteString("</html>")
 		if err != nil {
 			return err
 		}
