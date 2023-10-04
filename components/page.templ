@@ -1,12 +1,15 @@
 package components
 
+const BODY_ID = "the-body"
+
 templ Page() {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head></head>
-		<body onload={ App() }>
+		<body id={ BODY_ID }>
 			<h1>Check the console for a log!</h1>
 		</body>
+		@onLoad(App())
 	</html>
 }
 

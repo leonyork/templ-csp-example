@@ -30,7 +30,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// ... and without 'unsafe-hashes'
 	//csp := fmt.Sprintf( "default-src 'self'; script-src 'sha256-%s' 'sha256-%s';", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha))
 
-	w.Header().Add("Content-Security-Policy", csp)
+	w.Header().Add("No-Content-Security-Policy", csp)
 	components.Page().Render(r.Context(), w)
 }
 
