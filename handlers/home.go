@@ -15,7 +15,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Need both the SHA of the function contents...
+	// Now only need the SHA for the combined function and it's call.
 	funcSha, err := functionSha()
 
 	if err != nil {
@@ -23,38 +23,18 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//... And the sha on the `onload="..."` contents
-	callSha, err := callSha()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	csp := fmt.Sprintf("connect-src 'self'; script-src 'sha256-%s' '%s'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
 
-	// With 'unsafe-hashes'...
-	csp := fmt.Sprintf("connect-src 'self'; script-src 'sha256-%s' 'sha256-%s' '%s' 'unsafe-hashes'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
-	// ... and without 'unsafe-hashes'
-	//csp := fmt.Sprintf( "connect-src 'self'; script-src 'sha256-%s' 'sha256-%s' '%s'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
-	// If we set the connect-src to be none, then the `hx-get` will fail to load.
-	//csp := fmt.Sprintf("connect-src 'none'; script-src 'sha256-%s' 'sha256-%s' '%s' 'unsafe-hashes'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
-
-	w.Header().Add("No-Content-Security-Policy", csp)
+	w.Header().Add("Content-Security-Policy", csp)
 	components.Page().Render(r.Context(), w)
 }
 
 func functionSha() ([]byte, error) {
 	sha := sha256.New()
 
-	if _, err := sha.Write(([]byte)(components.App().Function)); err != nil {
-		return nil, err
-	}
+	script := components.App()
 
-	return sha.Sum(nil), nil
-}
-
-func callSha() ([]byte, error) {
-	sha := sha256.New()
-
-	if _, err := sha.Write(([]byte)(components.App().Call)); err != nil {
+	if _, err := sha.Write(([]byte)(script.Function + ";" + script.Call)); err != nil {
 		return nil, err
 	}
 

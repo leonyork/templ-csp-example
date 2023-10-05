@@ -2,7 +2,6 @@ package components
 
 const HTMX_SCRIPT_SHA = "sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
 const HTMX_STYLE_SHA = "sha256-d7rFBVhb3n/Drrf+EpNWYdITkos3kQRFpB0oSOycXg4="
-const BODY_ID = "the-body"
 
 templ Page() {
 	<!DOCTYPE html>
@@ -10,15 +9,17 @@ templ Page() {
 		<head>
 			<script src="https://unpkg.com/htmx.org@1.9.6" integrity={ HTMX_SCRIPT_SHA } crossorigin="anonymous"></script>
 		</head>
-		<body id={ BODY_ID }>
+		<body>
 			<h1>Check the console for a log!</h1>
 			<div id="htmx" hx-get hx-trigger="load">Loading htmx...</div>
 		</body>
-		@onLoad(App())
+		@inline(App())
 	</html>
 }
 
 script App() {
-	console.log("Loaded javascript!")
+  window.addEventListener("load", (event) => {
+	  console.log("Loaded javascript!")
+  });
 }
 

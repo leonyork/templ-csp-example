@@ -11,7 +11,6 @@ import "bytes"
 
 const HTMX_SCRIPT_SHA = "sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
 const HTMX_STYLE_SHA = "sha256-d7rFBVhb3n/Drrf+EpNWYdITkos3kQRFpB0oSOycXg4="
-const BODY_ID = "the-body"
 
 func Page() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
@@ -43,15 +42,7 @@ func Page() templ.Component {
 		if err != nil {
 			return err
 		}
-		_, err = templBuffer.WriteString("</script></head><body id=\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(BODY_ID))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\"><h1>")
+		_, err = templBuffer.WriteString("</script></head><body><h1>")
 		if err != nil {
 			return err
 		}
@@ -73,7 +64,7 @@ func Page() templ.Component {
 		if err != nil {
 			return err
 		}
-		err = onLoad(App()).Render(ctx, templBuffer)
+		err = inline(App()).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
@@ -90,8 +81,10 @@ func Page() templ.Component {
 
 func App() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name:     `__templ_App_3435`,
-		Function: `function __templ_App_3435(){console.log("Loaded javascript!")}`,
-		Call:     templ.SafeScript(`__templ_App_3435`),
+		Name: `__templ_App_c1e2`,
+		Function: `function __templ_App_c1e2(){window.addEventListener("load", (event) => {
+	  console.log("Loaded javascript!")
+  });}`,
+		Call: templ.SafeScript(`__templ_App_c1e2`),
 	}
 }
