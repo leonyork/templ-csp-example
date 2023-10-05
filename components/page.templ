@@ -1,19 +1,19 @@
 package components
 
-const BODY_ID = "the-body"
-
 templ Page() {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head></head>
-		<body id={ BODY_ID }>
+		<body>
 			<h1>Check the console for a log!</h1>
 		</body>
-		@onLoad(App())
+		@inline(App())
 	</html>
 }
 
 script App() {
-	console.log("Loaded!")
+  window.addEventListener("load", (event) => {
+	  console.log("Loaded!")
+  });
 }
 

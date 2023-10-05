@@ -9,8 +9,6 @@ import "context"
 import "io"
 import "bytes"
 
-const BODY_ID = "the-body"
-
 func Page() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
 		templBuffer, templIsBuffer := w.(*bytes.Buffer)
@@ -24,15 +22,7 @@ func Page() templ.Component {
 			var_1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"><head></head><body id=\"")
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString(templ.EscapeString(BODY_ID))
-		if err != nil {
-			return err
-		}
-		_, err = templBuffer.WriteString("\"><h1>")
+		_, err = templBuffer.WriteString("<!doctype html><html lang=\"en\"><head></head><body><h1>")
 		if err != nil {
 			return err
 		}
@@ -45,7 +35,7 @@ func Page() templ.Component {
 		if err != nil {
 			return err
 		}
-		err = onLoad(App()).Render(ctx, templBuffer)
+		err = inline(App()).Render(ctx, templBuffer)
 		if err != nil {
 			return err
 		}
@@ -62,8 +52,10 @@ func Page() templ.Component {
 
 func App() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name:     `__templ_App_1e4f`,
-		Function: `function __templ_App_1e4f(){console.log("Loaded!")}`,
-		Call:     templ.SafeScript(`__templ_App_1e4f`),
+		Name: `__templ_App_d993`,
+		Function: `function __templ_App_d993(){window.addEventListener("load", (event) => {
+	  console.log("Loaded!")
+  });}`,
+		Call: templ.SafeScript(`__templ_App_d993`),
 	}
 }
