@@ -62,8 +62,28 @@ func callSha() ([]byte, error) {
 }
 
 func handleHtmx(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("<div id=\"htmx\">Loaded htmx!</div><script type=\"text/javascript\">console.log(\"Loaded javascript!\")</script>")); err != nil {
+	javascript := "console.log(\"Loaded javascript!\")"
+	sha, err := javascriptSha(javascript)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	csp := fmt.Sprintf("script-src 'sha256-%s';", base64.StdEncoding.EncodeToString(sha))
+	w.Header().Add("Content-Security-Policy", csp)
+
+	content := fmt.Sprintf("<div id=\"htmx\">Loaded htmx!</div><script type=\"text/javascript\">%s</script>", javascript)
+	if _, err := w.Write([]byte(content)); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func javascriptSha(javascript string) ([]byte, error) {
+	sha := sha256.New()
+
+	if _, err := sha.Write(([]byte)(javascript)); err != nil {
+		return nil, err
+	}
+
+	return sha.Sum(nil), nil
 }
