@@ -62,7 +62,7 @@ func callSha() ([]byte, error) {
 }
 
 func handleHtmx(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("<div id=\"htmx\">Loaded htmx!</div>")); err != nil {
+	if _, err := w.Write([]byte("<div id=\"htmx\">Loaded htmx!</div><script type=\"text/javascript\">console.log(\"Loaded javascript!\")</script>")); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
