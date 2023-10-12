@@ -10,14 +10,19 @@ import (
 )
 
 func ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.Header.Get("Hx-Request") == "true" {
+		handleHtmx(w, r)
+		return
+	}
+
 	// Need both the SHA of the function contents...
 	funcSha, err := functionSha()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-	}	
-	
+	}
+
 	//... And the sha on the `onload="..."` contents
 	callSha, err := callSha()
 	if err != nil {
@@ -26,9 +31,11 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// With 'unsafe-hashes'...
-	csp := fmt.Sprintf( "default-src 'self'; script-src 'sha256-%s' 'sha256-%s' 'unsafe-hashes';", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha))
+	csp := fmt.Sprintf("connect-src 'self'; script-src 'sha256-%s' 'sha256-%s' '%s' 'unsafe-hashes'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
 	// ... and without 'unsafe-hashes'
-	//csp := fmt.Sprintf( "default-src 'self'; script-src 'sha256-%s' 'sha256-%s';", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha))
+	//csp := fmt.Sprintf( "connect-src 'self'; script-src 'sha256-%s' 'sha256-%s' '%s'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
+	// If we set the connect-src to be none, then the `hx-get` will fail to load.
+	//csp := fmt.Sprintf("connect-src 'none'; script-src 'sha256-%s' 'sha256-%s' '%s' 'unsafe-hashes'; style-src '%s'", base64.StdEncoding.EncodeToString(funcSha), base64.StdEncoding.EncodeToString(callSha), components.HTMX_SCRIPT_SHA, components.HTMX_STYLE_SHA)
 
 	w.Header().Add("Content-Security-Policy", csp)
 	components.Page().Render(r.Context(), w)
@@ -44,7 +51,6 @@ func functionSha() ([]byte, error) {
 	return sha.Sum(nil), nil
 }
 
-
 func callSha() ([]byte, error) {
 	sha := sha256.New()
 
@@ -53,4 +59,11 @@ func callSha() ([]byte, error) {
 	}
 
 	return sha.Sum(nil), nil
+}
+
+func handleHtmx(w http.ResponseWriter, r *http.Request) {
+	if _, err := w.Write([]byte("<div id=\"htmx\">Loaded htmx!</div>")); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
